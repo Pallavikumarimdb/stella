@@ -415,37 +415,65 @@ type DockedComposerProps = {
  * z-40) so the two never fight where they meet, and the chips sit below
  * it (z-30) so an open thread wins the overlap.
  */
-export const DockedComposer = ({ chips, bar, dock }: DockedComposerProps) => (
-  <div
-    className={cn(
-      "pointer-events-none absolute inset-x-0 bottom-3.5 flex flex-col items-center",
-      OVERLAY_LAYER_CLASS_NAMES.chrome,
-    )}
-  >
-    <ComposerVeil variant="pane" />
-    {chips !== undefined && (
+export const DockedComposer = ({ chips, bar, dock }: DockedComposerProps) => {
+  const blockRef = useRef<HTMLDivElement>(null);
+
+  useExternalSyncEffect(() => {
+    const block = blockRef.current;
+    if (block === null) {
+      return undefined;
+    }
+    const panel = block.closest('[data-slot="inspector-chat-panel"]');
+    if (panel === null) {
+      return undefined;
+    }
+    const observer = new ResizeObserver(() => {
+      if (panel instanceof HTMLElement) {
+        panel.style.setProperty(
+          "--composer-block-h",
+          `${String(block.offsetHeight)}px`,
+        );
+      }
+    });
+    observer.observe(block);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <div
+      ref={blockRef}
+      className={cn(
+        "pointer-events-none absolute inset-x-0 bottom-3.5 flex flex-col items-center",
+        OVERLAY_LAYER_CLASS_NAMES.chrome,
+      )}
+    >
+      <ComposerVeil variant="pane" />
+      {chips !== undefined && (
+        <div
+          className={cn(
+            "pointer-events-auto relative z-30 px-1",
+            DOCKED_COMPOSER_WIDTH_CLASS,
+          )}
+        >
+          {chips}
+        </div>
+      )}
       <div
         className={cn(
-          "pointer-events-auto relative z-30 px-1",
+          "pointer-events-auto relative z-50 flex flex-col",
           DOCKED_COMPOSER_WIDTH_CLASS,
         )}
       >
-        {chips}
+        {bar}
+        {/* No extra top margin: `ComposerStatusRow` owns the single
+              bar-to-row gap (mt-1.5), matching the main chat tray's rhythm. */}
+        {dock !== undefined && <div className="px-1">{dock}</div>}
       </div>
-    )}
-    <div
-      className={cn(
-        "pointer-events-auto relative z-50 flex flex-col",
-        DOCKED_COMPOSER_WIDTH_CLASS,
-      )}
-    >
-      {bar}
-      {/* No extra top margin: `ComposerStatusRow` owns the single
-            bar-to-row gap (mt-1.5), matching the main chat tray's rhythm. */}
-      {dock !== undefined && <div className="px-1">{dock}</div>}
     </div>
-  </div>
-);
+  );
+};
 
 /**
  * Collapse affordance rendered by `ChatThreadCard` in its top end

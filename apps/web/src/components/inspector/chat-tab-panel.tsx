@@ -632,7 +632,7 @@ export const ChatTabPanel = ({
           <Conversation className="min-h-0 flex-1">
             {/* Bottom padding keeps the last messages readable above the
                 floating composer block (veil + pill + status row). */}
-            <ConversationContent className="gap-3 pb-32">
+            <ConversationContent className="gap-3 pb-[calc(var(--composer-block-h,8rem)+1.5rem)]">
               {messages.length === 0 && !isGenerating && !error ? (
                 <ChatEmptyState
                   onSelectPrompt={handleSelectPrompt}
@@ -666,7 +666,10 @@ export const ChatTabPanel = ({
             </ConversationContent>
             {/* Clear the floating composer block (veil + pill + row). */}
             <ConversationScrollButton
-              className={cn("bottom-32", hasSuggestedFollowups && "hidden")}
+              className={cn(
+                "bottom-[calc(var(--composer-block-h,8rem)+0.75rem)]",
+                hasSuggestedFollowups && "hidden",
+              )}
             />
           </Conversation>
 
@@ -948,7 +951,7 @@ export const ChatTabPanelShell = ({
       tab={tab}
     >
       <Conversation className="min-h-0 flex-1">
-        <ConversationContent className="gap-3 pb-32">
+        <ConversationContent className="gap-3 pb-[calc(var(--composer-block-h,8rem)+1.5rem)]">
           <ChatEmptyState onSelectPrompt={noop} prompts={savedPrompts} />
         </ConversationContent>
       </Conversation>
